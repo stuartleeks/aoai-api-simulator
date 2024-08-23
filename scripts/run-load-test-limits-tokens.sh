@@ -25,7 +25,7 @@ deployment_name="gpt-35-turbo-100k-token"
 
 result=$(\
   LOCUST_USERS=30 \
-  LOCUST_RUN_TIME=3m \
+  LOCUST_RUN_TIME=5m \
   LOCUST_SPAWN_RATE=2 \
   TEST_FILE=./test_chat_completions_no_added_latency.py \
   DEPLOYMENT_NAME=$deployment_name \

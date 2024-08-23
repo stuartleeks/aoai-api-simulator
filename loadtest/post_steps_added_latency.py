@@ -29,7 +29,7 @@ print(f"test_start_time  : {test_start_time}")
 print(f"test_end_time    : {test_stop_time}")
 
 
-metric_check_time = test_stop_time - timedelta(seconds=40)  # detecting the end of the test can take 30s, add 10s buffer
+metric_check_time = test_stop_time - timedelta(seconds=30)  # detecting the end of the test can take 20s, add 10s buffer
 
 query_processor = QueryProcessor(
     workspace_id=log_analytics_workspace_id,
