@@ -125,7 +125,36 @@ resource assignSecretsReaderRole_CurrentUser 'Microsoft.Authorization/roleAssign
   }
 }
 
+resource storageFileDataPrivilegedContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '69566ab7-960f-475b-8e7c-b3118f30c6bd' // https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-file-data-privileged-contributor
+}
+resource assignStorageContributorRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(resourceGroup().id, vault.name, managedIdentity.name, 'assignStorageContributorRole')
+  scope: storageAccount
+  properties: {
+    description: 'Assign Storage File Data Privileged Contributor role to ACA identity'
+    principalId: managedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: storageFileDataPrivilegedContributorRoleDefinition.id
+  }
+}
 
+
+resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7' // https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#general
+}
+resource assignStorageReaderRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(resourceGroup().id, vault.name, managedIdentity.name, 'assignReaderRole')
+  scope: storageAccount
+  properties: {
+    description: 'Assign Reader role to ACA identity'
+    principalId: managedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: readerRoleDefinition.id
+  }
+}
 
 resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-11-02-preview' = {
   name: containerAppEnvName
@@ -151,6 +180,7 @@ resource containerAppStorage 'Microsoft.App/managedEnvironments/storages@2023-05
       accessMode: 'ReadWrite'
     }
   }
+  dependsOn: [assignStorageContributorRole]
 }
 
 resource simulatorApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
@@ -265,10 +295,10 @@ resource apiSim 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'deployment-config'
           storageType: 'Secret'
-          secrets:[
+          secrets: [
             {
-              secretRef:'deployment-config'
-              path:'simulator_deployment_config.json'
+              secretRef: 'deployment-config'
+              path: 'simulator_deployment_config.json'
             }
           ]
         }
